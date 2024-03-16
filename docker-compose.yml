@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  go-app:
+    image: <your-dockerhub-username>/go-app
+    ports:
+      - "8080:8080"
+    # Add any additional configuration for the Go application
+
+  nextjs-app:
+    image: <your-dockerhub-username>/nextjs-app
+    ports:
+      - "3000:3000"
+    # Add any additional configuration for the Next.js application
+
+  wordpress:
+    image: <your-dockerhub-username>/wordpress-site
+    ports:
+      - "80:80"
+    # Add any additional configuration for the WordPress site
