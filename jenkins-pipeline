@@ -1,0 +1,62 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/your-username/extended-application.git'
+            }
+        }
+
+        stage('Go CI') {
+            when {
+                branch 'main'
+            }
+            steps {
+                dir('go') {
+                    sh 'go mod tidy'
+                    sh 'golangci-lint run ./...'
+                    sh 'go test ./...'
+                }
+            }
+        }
+
+        stage('Next.js CI') {
+            when {
+                branch 'main'
+            }
+            steps {
+                dir('nextjs') {
+                    sh 'npm install'
+                    sh 'eslint .'
+                    sh 'npm test'
+                }
+            }
+        }
+
+        stage('WordPress CI') {
+            when {
+                branch 'main'
+            }
+            steps {
+                dir('wordpress') {
+                    sh 'phpcs --standard=WordPress src/'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                def goExitCode = currentBuild.result == 'SUCCESS' ? 0 : 1
+                def nextjsExitCode = currentBuild.result == 'SUCCESS' ? 0 : 1
+                def wordpressExitCode = currentBuild.result == 'SUCCESS' ? 0 : 1
+
+                if (goExitCode != 0 || nextjsExitCode != 0 || wordpressExitCode != 0) {
+                    error "One or more stages failed. Check logs for details."
+                }
+            }
+        }
+    }
+}
